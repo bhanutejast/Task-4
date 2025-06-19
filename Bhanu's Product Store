@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bhanu's Product Store</title>
+  <style>
+    :root {
+      --primary: #1e88e5;
+      --light: #f5f7fa;
+      --text: #333;
+      --card: #fff;
+      --shadow: rgba(0, 0, 0, 0.1);
+    }
+    body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--light); color: var(--text); }
+    header { background-color: var(--primary); color: white; padding: 2rem; text-align: center; box-shadow: 0 4px 12px var(--shadow); }
+    .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; padding: 1.2rem; background: var(--card); box-shadow: 0 4px 12px var(--shadow); }
+    .filters select { padding: 0.6rem 1rem; border-radius: 6px; font-size: 1rem; border: 1px solid #ccc; }
+    .products { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.5rem; padding: 2rem; max-width: 1200px; margin: auto; }
+    .product-card { background-color: var(--card); border-radius: 10px; box-shadow: 0 4px 12px var(--shadow); overflow: hidden; transition: transform 0.3s ease; }
+    .product-card:hover { transform: scale(1.03); }
+    .product-card img { width: 100%; height: 180px; object-fit: cover; }
+    .product-card .details { padding: 1rem; }
+    .product-card h3 { margin: 0; font-size: 1.1rem; }
+    .price { font-weight: bold; color: #1a73e8; margin: 0.5rem 0; }
+    .rating { color: #f39c12; font-size: 0.95rem; }
+    .category { font-size: 0.85rem; color: gray; margin-top: 0.3rem; }
+    @media (max-width: 600px) {
+      .filters { flex-direction: column; align-items: center; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>🛍️ B&S's Product Store</h1>
+  <p>Filter & sort products with a clean, stylish UI</p>
+</header>
+
+<div class="filters">
+  <label>
+    Filter by Category:
+    <select id="categoryFilter" onchange="filterAndSort()">
+      <option value="All">All</option>
+      <option value="Electronics">Electronics</option>
+      <option value="Books">Books</option>
+      <option value="Clothing">Clothing</option>
+    </select>
+  </label>
+  <label>
+    Sort by:
+    <select id="sortOption" onchange="filterAndSort()">
+      <option value="default">Default</option>
+      <option value="priceLow">Price: Low to High</option>
+      <option value="priceHigh">Price: High to Low</option>
+      <option value="rating">Rating</option>
+    </select>
+  </label>
+</div>
+
+<div class="products" id="productList"></div>
+
+<script>
+  const products = [
+    { name: "Apple iPhone 15", category: "Electronics", price: 79900, rating: 4.7,
+      image: "https://www.apple.com/newsroom/images/2023/09/apple-unveils-iphone-15-pro-and-iphone-15-pro-max/tile/Apple-iPhone-15-Pro-lineup-hero-230912.jpg.news_app_ed.jpg" },
+    { name: "Samsung Galaxy Tab S9", category: "Electronics", price: 64999, rating: 4.5,
+      image: "https://static1.anpoimages.com/wordpress/wp-content/uploads/2023/08/samsung-galaxy-tab-s9-review-15.jpg" },
+    { name: "HP Pavilion Laptop", category: "Electronics", price: 58990, rating: 4.3,
+      image: "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=600&q=80" },
+    { name: "Noise Smart Watch", category: "Electronics", price: 2999, rating: 4.1,
+      image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSYcLabeQRzGb85IFoxWTFf7VzQAGJVk6fhA&s" },
+    { name: "The Alchemist - Paulo Coelho", category: "Books", price: 299, rating: 4.8,
+      image: "https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=600&q=80" },
+    { name: "Atomic Habits - James Clear", category: "Books", price: 449, rating: 4.9,
+      image: "https://m.media-amazon.com/images/I/81+9Gbu0isL._UF350,350_QL80_.jpg" },
+    { name: "Wings of Fire", category: "Books", price: 350, rating: 4.7,
+      image: "https://uniathenaprods3.uniathena.com/s3fs-public/2024-01/Wings-of-Fire-Abdul-Kalam.jpg" },
+    { name: "Ikigai - Japanese Wisdom", category: "Books", price: 375, rating: 4.5,
+      image: "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=600&q=80" },
+    { name: "Men's Cotton Polo T-Shirt", category: "Clothing", price: 999, rating: 4.2,
+      image: "https://teestores.in/cdn/shop/files/uneek-unisex-classic-polo-shirt-burgundy-p2552-205813_image.jpg?v=1706074961" },
+    { name: "Women's Summer Dress", category: "Clothing", price: 1499, rating: 4.3,
+      image: "https://www.oldmarigold.com/cdn/shop/files/1_ac6e4687-7f65-492c-9421-84a92c90353f.png?v=1716877587" },
+    { name: "Unisex Hoodie", category: "Clothing", price: 1199, rating: 4.4,
+      image: "https://5.imimg.com/data5/SELLER/Default/2020/11/YK/TW/JY/27105180/hoodies-unisex-png-500x500.png" },
+    { name: "Kids' Cartoon T-Shirt", category: "Clothing", price: 499, rating: 4.1,
+      image: "https://img4.dhresource.com/webp/m/0x0/f3/albu/jc/j/08/51cf67ab-1bfe-4336-8a3d-0af5b8bc715b.jpg" }
+  ];
+
+  function displayProducts(data) {
+    const container = document.getElementById("productList");
+    container.innerHTML = "";
+    data.forEach(p => {
+      container.innerHTML += `
+        <div class="product-card">
+          <img src="${p.image}" alt="${p.name}" />
+          <div class="details">
+            <h3>${p.name}</h3>
+            <p class="price">₹${p.price.toLocaleString()}</p>
+            <p class="rating">⭐ ${p.rating}</p>
+            <p class="category">Category: ${p.category}</p>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function filterAndSort() {
+    const cat = document.getElementById("categoryFilter").value;
+    const sort = document.getElementById("sortOption").value;
+    let result = [...products];
+    if (cat !== "All") result = result.filter(p => p.category === cat);
+    if (sort === "priceLow") result.sort((a, b) => a.price - b.price);
+    else if (sort === "priceHigh") result.sort((a, b) => b.price - a.price);
+    else if (sort === "rating") result.sort((a, b) => b.rating - a.rating);
+    displayProducts(result);
+  }
+
+  displayProducts(products);
+</script>
+
+</body>
+</html>
